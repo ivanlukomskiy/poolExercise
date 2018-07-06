@@ -18,13 +18,13 @@ public class PoolTest {
     private static final int POOL_LIMIT = 4;
     private static final int POOL_TIMEOUT = 2000;
 
-    private Pool.DataSourcePool dataSource;
+    private Pool.ConnectionPool dataSource;
 
     @Before
     public void initConnectionsPool() throws Exception {
         Pool.DataSource dataSourceOrigin = mock(Pool.DataSource.class);
         when(dataSourceOrigin.getConnection()).thenAnswer(invocation -> mock(Pool.Connection.class));
-        dataSource = new Pool.DataSourcePool(POOL_LIMIT, POOL_TIMEOUT, dataSourceOrigin);
+        dataSource = new Pool.ConnectionPool(POOL_LIMIT, POOL_TIMEOUT, dataSourceOrigin);
     }
 
     @Test

@@ -21,7 +21,7 @@ public class Pool {
         void doSomething() throws Exception;
     }
 
-    static class DataSourcePool implements DataSource {
+    static class ConnectionPool implements DataSource {
 
         private final int limit;
         private final DataSource originalDataSource;
@@ -30,7 +30,7 @@ public class Pool {
         private AtomicInteger connectionsCreated = new AtomicInteger(0);
         private final BlockingQueue<Connection> freeConnections = new LinkedBlockingQueue<>();
 
-        DataSourcePool(int limit, int timeout, DataSource dataSource) {
+        ConnectionPool(int limit, int timeout, DataSource dataSource) {
             this.limit = limit;
             this.timeout = timeout;
             originalDataSource = dataSource;
@@ -52,7 +52,7 @@ public class Pool {
                 // Wait for the next available free connection
                 Connection freeConnection = freeConnections.poll(timeout, MILLISECONDS);
                 if (freeConnection == null) {
-                    throw new TimeoutException("Timeout exceed");
+                    throw new TimeoutException();
                 }
                 return new PooledConnection(freeConnection, this);
             }
@@ -70,10 +70,10 @@ public class Pool {
     static class PooledConnection implements Connection {
 
         private final Connection origin;
-        private final DataSourcePool pool;
+        private final ConnectionPool pool;
         private boolean closed = false;
 
-        PooledConnection(Connection origin, DataSourcePool pool) {
+        PooledConnection(Connection origin, ConnectionPool pool) {
             this.origin = origin;
             this.pool = pool;
         }
