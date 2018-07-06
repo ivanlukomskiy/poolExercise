@@ -89,7 +89,7 @@ public class PoolTest {
             public void run() {
                 try {
                     // Await for other threads to initialize
-                    barrier.await();
+                    barrier.await(1, SECONDS);
 
                     for (int i = 0; i < 1000; i++) {
                         Pool.Connection connection = dataSource.getConnection();
