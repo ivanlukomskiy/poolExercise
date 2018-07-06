@@ -83,7 +83,7 @@ public class PoolTest {
 
     @Test
     public void testConcurrentAccess() throws Exception {
-        CyclicBarrier barrier = new CyclicBarrier(POOL_LIMIT + 1);
+        CyclicBarrier barrier = new CyclicBarrier(POOL_LIMIT * 2 + 1);
 
         Runnable dbTask = new Runnable() {
             Random random = new Random();
@@ -93,10 +93,11 @@ public class PoolTest {
                     // Await for other threads to initialize
                     barrier.await(1, SECONDS);
 
-                    for (int i = 0; i < 1000; i++) {
+                    for (int i = 0; i < 300; i++) {
                         Pool.Connection connection = dataSource.getConnection();
                         connection.doSomething();
                         Thread.sleep(random.nextInt(10));
+                        System.out.println(Thread.currentThread().getName());
                         connection.doSomething();
                         connection.close();
                     }
@@ -107,7 +108,7 @@ public class PoolTest {
             }
         };
 
-        for (int i = 0; i < POOL_LIMIT; i++) {
+        for (int i = 0; i < POOL_LIMIT * 2; i++) {
             new Thread(dbTask).start();
         }
         barrier.await(1, SECONDS); // Wait for the threads to get ready
