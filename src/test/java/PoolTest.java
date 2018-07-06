@@ -2,6 +2,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Random;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeoutException;
 
@@ -85,6 +86,7 @@ public class PoolTest {
         CyclicBarrier barrier = new CyclicBarrier(POOL_LIMIT + 1);
 
         Runnable dbTask = new Runnable() {
+            Random random = new Random();
             @Override
             public void run() {
                 try {
@@ -94,9 +96,11 @@ public class PoolTest {
                     for (int i = 0; i < 1000; i++) {
                         Pool.Connection connection = dataSource.getConnection();
                         connection.doSomething();
+                        Thread.sleep(random.nextInt(10));
+                        connection.doSomething();
                         connection.close();
                     }
-                    barrier.await(1, SECONDS);
+                    barrier.await(10, SECONDS);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -107,6 +111,6 @@ public class PoolTest {
             new Thread(dbTask).start();
         }
         barrier.await(1, SECONDS); // Wait for the threads to get ready
-        barrier.await(1, SECONDS); // Wait for the threads to finish
+        barrier.await(10, SECONDS); // Wait for the threads to finish
     }
 }
